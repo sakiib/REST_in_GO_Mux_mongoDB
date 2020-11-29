@@ -2,6 +2,6 @@ package model
 
 // Author struct
 type Author struct {
-	Firstname string `json:"firstname"`
-	Lastname  string `json:"lastname"`
+	Firstname string `json:"firstname" bson:"firstname"`
+	Lastname  string `json:"lastname" bson:"lastname"`
 }
