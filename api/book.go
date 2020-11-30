@@ -9,6 +9,9 @@ import (
 	"restapimongo/model"
 	"time"
 
+	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -41,7 +44,20 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 
 // GetBook ...
 func GetBook(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("GetBook")
+	w.Header().Add("Content-Type", "application/json")
+	params := mux.Vars(r)
+	id, _ := primitive.ObjectIDFromHex(params["id"])
+	var book model.Book
+	collection := db.Client.Database("goRESTapi").Collection("books")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err := collection.FindOne(ctx, model.Book{ID: id}).Decode(&book)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{ "message: "` + err.Error() + `"}"`))
+		return
+	}
+	json.NewEncoder(w).Encode(book)
 }
 
 // CreateBook ...
