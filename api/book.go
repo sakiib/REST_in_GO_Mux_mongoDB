@@ -8,11 +8,36 @@ import (
 	"restapimongo/db"
 	"restapimongo/model"
 	"time"
+
+	"gopkg.in/mgo.v2/bson"
 )
 
 // GetBooks ...
 func GetBooks(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("GetBooks")
+	w.Header().Add("Content-Type", "application/json")
+	var books []model.Book
+	collection := db.Client.Database("goRESTapi").Collection("books")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{ "message: "` + err.Error() + `"}"`))
+		return
+	}
+	defer cursor.Close(ctx)
+	for cursor.Next(ctx) {
+		var book model.Book
+		cursor.Decode(&book)
+		books = append(books, book)
+	}
+	if err := cursor.Err(); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{ "message: "` + err.Error() + `"}"`))
+		return
+	}
+	json.NewEncoder(w).Encode(books)
 }
 
 // GetBook ...
