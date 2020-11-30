@@ -14,7 +14,6 @@ import (
 
 // GetBooks ...
 func GetBooks(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("GetBooks")
 	w.Header().Add("Content-Type", "application/json")
 	var books []model.Book
 	collection := db.Client.Database("goRESTapi").Collection("books")
@@ -47,7 +46,6 @@ func GetBook(w http.ResponseWriter, r *http.Request) {
 
 // CreateBook ...
 func CreateBook(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("CreateBook")
 	w.Header().Add("Content-Type", "application/json")
 	collection := db.Client.Database("goRESTapi").Collection("books")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
